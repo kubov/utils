@@ -1,0 +1,18 @@
+case $1 in
+	hibernate)
+		echo "I don't care"
+		;;
+	suspend)
+		echo "ok, let's fix this"
+	cat /proc/acpi/wakeup | grep enabled | while read line; do
+		name=`echo $line | awk '{ print $1}'`
+		address=`echo $line | awk '{print $4}'`
+		if [ $name != "PS2K" ] && [ $name != "PWRB" ]; then
+			address=${address:4}
+			echo $address
+			echo disabled > /sys/bus/pci/devices/$address/power/wakeup
+		fi
+	done
+	;;
+esac
+		
