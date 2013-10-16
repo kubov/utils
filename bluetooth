@@ -1,0 +1,3 @@
+simple-agent hci0 09:30:DE:04:0E:F7
+bluez-test-device trusted 09:30:DE:04:0E:F7 yes
+bluez-test-input connect 09:30:DE:04:0E:F7
