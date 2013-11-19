@@ -1,5 +1,5 @@
 (defparameter *sieve* nil)
-(defparameter *limit* 10000000)
+(defparameter *limit* 1000000)
 (defparameter *lower-limit* 100)
 
 (defun get-random-coprime-to (n)
@@ -43,17 +43,27 @@
                          *lower-limit*))
               while (equal (aref *sieve* ri) nil))
         (aref *sieve* ri))
-      (init-sieve)))
+      (progn (init-sieve)
+	     (get-random-prime))))
 
-(defun modular-exponent (a e m)
-  (let ((c 1) (base a))
-    (do 
-	((if (oddp e)
-	    (setf c (mod (* c base) m)))
-	    (setf e (ash c -1))
-	 (setf base (mod (* base base) m)))
-	t)
-    c))
+(defun positive-modular-exponent (n exponent modulus)
+  (declare (optimize (speed 3) (safety 0) (space 0) (debug 0)))
+  (loop with result = 1
+        for i of-type fixnum from 0 below (integer-length exponent)
+        for sqr = n then (mod (* sqr sqr) modulus)
+        when (logbitp i exponent) do
+        (setf result (mod (* result sqr) modulus))
+        finally (return result)))
+
+(defun negative-modular-exponent (n exponent modulus)
+  (let ((inv (modular-inverse n modulus)))
+    (positive-modular-exponent inv (abs exponent) modulus)))
+
+(defun modular-exponent (n exponent modulus)
+  (apply (if (< exponent 0)
+	     'negative-modular-exponent
+	     'positive-modular-exponent)
+	 `(,n ,exponent ,modulus)))
 
 (defun generate-keys ()
   (let* ((p (get-random-prime))
@@ -76,3 +86,15 @@
                                  (char-int (aref message i))) e n)))
     ret))
 
+(defun decrypt (cipher privkey)
+  (map 'string #'code-char (encrypt cipher privkey)))
+
+(defun test (data)
+  (let* ((keys (generate-keys))
+	 (pubkey (getf keys :pubkey))
+	 (privkey (getf keys :privkey))
+	 (cipher nil))
+    (format t "Encrypting '~A' string~%" data)
+    (setf cipher (encrypt data pubkey))
+    (format t "Got ~A~%" cipher)
+    (format t "After decrypt got '~A'~%" (decrypt cipher privkey))))

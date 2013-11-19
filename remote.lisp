@@ -1,8 +1,10 @@
 (require :usocket)
-(in-package :usocket)
 
 (defparameter *server* nil)
 (defparameter *handlers* (make-hash-table :test 'equal))
+(defparameter *script-path* (concatenate 'string
+					 (sb-ext:posix-getenv "HOME")
+					 "/code/utils/scripts/"))
 
 (defun default-handler (code state)
   (format t "unused key ~A ~A~%" code state))
@@ -16,9 +18,6 @@
 	(funcall handler code state)
 	(default-handler code state))))
 
-(defun forever (fun)
-  (lambda () (loop do (funcall fun))))
-
 (defun handle (strm)
   (loop do
        (let* ((sym (with-input-from-string (str (read-line strm)) (read str)))
@@ -27,7 +26,16 @@
 	 (dispatch code state))))
 
 (defun start (port)
-  (setf *server* (socket-server "0.0.0.0" port 'handle))))
+  (setf *server* (usocket:socket-server "0.0.0.0" port 'handle)))
 
-(defhandler 'up 1
-  (format t "Volume up~%"))
+(defun call-script (script-name)
+  (sb-ext:run-program "/bin/sh" `("-c" ,(concatenate 'string *script-path* script-name))))
+
+(defhandler 'up 'down
+  (call-script "volume-up"))
+
+(defhandler 'down 'down
+  (call-script "volume-down"))
+
+(defhandler 'asterix 'down
+  (call-script "mute"))
