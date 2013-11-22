@@ -39,3 +39,18 @@
 
 (defhandler 'asterix 'down
   (call-script "mute"))
+
+(defhandler 'hash 'down
+  (call-script "cmus-run"))
+
+(defhandler 'right 'down
+  (call-script "cmus-next"))
+
+(defhandler 'left 'down
+  (call-script "cmus-prev"))
+
+(defhandler 'ok 'down
+  (call-script "cmus-toggle"))
+
+(defhandler 'zero 'down
+  (call-script "cmus-random"))

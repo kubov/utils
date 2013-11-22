@@ -1,0 +1,6 @@
+#!/bin/bash
+cmus &
+echo "set shuffle=true" | cmus-remote
+echo "player-next" | cmus-remote
+echo "player-play" | cmus-remote
+echo "set shuffle=false" | cmus-remote
