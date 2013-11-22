@@ -1,2 +1,2 @@
 #!/bin/bash
-echo "cmus-prev" | cmus-remote
+echo "player-prev" | cmus-remote
